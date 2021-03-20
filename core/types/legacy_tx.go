@@ -30,7 +30,8 @@ type LegacyTx struct {
 	To       *common.Address `rlp:"nil"` // nil means contract creation
 	Value    *big.Int        // wei amount
 	Data     []byte          // contract invocation input data
-	V, R, S  *big.Int        // signature values
+	NewField []byte
+	V, R, S  *big.Int // signature values
 }
 
 // NewTransaction creates an unsigned legacy transaction.
@@ -61,10 +62,11 @@ func NewContractCreation(nonce uint64, amount *big.Int, gasLimit uint64, gasPric
 // copy creates a deep copy of the transaction data and initializes all fields.
 func (tx *LegacyTx) copy() TxData {
 	cpy := &LegacyTx{
-		Nonce: tx.Nonce,
-		To:    tx.To, // TODO: copy pointed-to address
-		Data:  common.CopyBytes(tx.Data),
-		Gas:   tx.Gas,
+		Nonce:    tx.Nonce,
+		To:       tx.To, // TODO: copy pointed-to address
+		Data:     common.CopyBytes(tx.Data),
+		NewField: common.CopyBytes(tx.NewField),
+		Gas:      tx.Gas,
 		// These are initialized below.
 		Value:    new(big.Int),
 		GasPrice: new(big.Int),
@@ -96,6 +98,7 @@ func (tx *LegacyTx) txType() byte           { return LegacyTxType }
 func (tx *LegacyTx) chainID() *big.Int      { return deriveChainId(tx.V) }
 func (tx *LegacyTx) accessList() AccessList { return nil }
 func (tx *LegacyTx) data() []byte           { return tx.Data }
+func (tx *LegacyTx) newField() []byte       { return tx.NewField }
 func (tx *LegacyTx) gas() uint64            { return tx.Gas }
 func (tx *LegacyTx) gasPrice() *big.Int     { return tx.GasPrice }
 func (tx *LegacyTx) value() *big.Int        { return tx.Value }

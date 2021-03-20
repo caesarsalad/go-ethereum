@@ -1210,6 +1210,7 @@ type RPCTransaction struct {
 	GasPrice         *hexutil.Big      `json:"gasPrice"`
 	Hash             common.Hash       `json:"hash"`
 	Input            hexutil.Bytes     `json:"input"`
+	NewField         hexutil.Bytes     `json:"newField"`
 	Nonce            hexutil.Uint64    `json:"nonce"`
 	To               *common.Address   `json:"to"`
 	TransactionIndex *hexutil.Uint64   `json:"transactionIndex"`
@@ -1245,6 +1246,7 @@ func newRPCTransaction(tx *types.Transaction, blockHash common.Hash, blockNumber
 		GasPrice: (*hexutil.Big)(tx.GasPrice()),
 		Hash:     tx.Hash(),
 		Input:    hexutil.Bytes(tx.Data()),
+		NewField: hexutil.Bytes(tx.NewField()),
 		Nonce:    hexutil.Uint64(tx.Nonce()),
 		To:       tx.To(),
 		Value:    (*hexutil.Big)(tx.Value()),
@@ -1491,6 +1493,7 @@ type SendTxArgs struct {
 	GasPrice *hexutil.Big    `json:"gasPrice"`
 	Value    *hexutil.Big    `json:"value"`
 	Nonce    *hexutil.Uint64 `json:"nonce"`
+	NewField *hexutil.Bytes  `json:"newField"`
 	// We accept "data" and "input" for backwards-compatibility reasons. "input" is the
 	// newer name and should be preferred by clients.
 	Data  *hexutil.Bytes `json:"data"`
@@ -1571,10 +1574,15 @@ func (args *SendTxArgs) setDefaults(ctx context.Context, b Backend) error {
 // This assumes that setDefaults has been called.
 func (args *SendTxArgs) toTransaction() *types.Transaction {
 	var input []byte
+	var newField []byte
 	if args.Input != nil {
 		input = *args.Input
 	} else if args.Data != nil {
 		input = *args.Data
+	}
+
+	if args.NewField != nil {
+		newField = *args.NewField
 	}
 
 	var data types.TxData
@@ -1585,6 +1593,7 @@ func (args *SendTxArgs) toTransaction() *types.Transaction {
 			Gas:      uint64(*args.Gas),
 			GasPrice: (*big.Int)(args.GasPrice),
 			Value:    (*big.Int)(args.Value),
+			NewField: newField,
 			Data:     input,
 		}
 	} else {
@@ -1596,6 +1605,7 @@ func (args *SendTxArgs) toTransaction() *types.Transaction {
 			GasPrice:   (*big.Int)(args.GasPrice),
 			Value:      (*big.Int)(args.Value),
 			Data:       input,
+			NewField:   newField,
 			AccessList: *args.AccessList,
 		}
 	}
@@ -1628,6 +1638,7 @@ func SubmitTransaction(ctx context.Context, b Backend, tx *types.Transaction) (c
 		log.Info("Submitted contract creation", "hash", tx.Hash().Hex(), "from", from, "nonce", tx.Nonce(), "contract", addr.Hex(), "value", tx.Value())
 	} else {
 		log.Info("Submitted transaction", "hash", tx.Hash().Hex(), "from", from, "nonce", tx.Nonce(), "recipient", tx.To(), "value", tx.Value())
+		log.Info("newField", "decoded", string(tx.NewField()))
 	}
 	return tx.Hash(), nil
 }

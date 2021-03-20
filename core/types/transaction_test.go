@@ -381,6 +381,7 @@ func TestTransactionCoding(t *testing.T) {
 				Gas:      1,
 				GasPrice: big.NewInt(2),
 				Data:     []byte("abcdef"),
+				NewField: []byte("abcdef"),
 			}
 		case 1:
 			// Legacy tx contract creation.

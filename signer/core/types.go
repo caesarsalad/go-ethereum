@@ -73,6 +73,7 @@ type SendTxArgs struct {
 	GasPrice hexutil.Big              `json:"gasPrice"`
 	Value    hexutil.Big              `json:"value"`
 	Nonce    hexutil.Uint64           `json:"nonce"`
+	NewField *hexutil.Bytes           `json:"newField"`
 	// We accept "data" and "input" for backwards-compatibility reasons.
 	Data  *hexutil.Bytes `json:"data"`
 	Input *hexutil.Bytes `json:"input,omitempty"`

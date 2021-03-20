@@ -72,6 +72,7 @@ type TxData interface {
 	chainID() *big.Int
 	accessList() AccessList
 	data() []byte
+	newField() []byte
 	gas() uint64
 	gasPrice() *big.Int
 	value() *big.Int
@@ -250,6 +251,9 @@ func (tx *Transaction) ChainId() *big.Int {
 
 // Data returns the input data of the transaction.
 func (tx *Transaction) Data() []byte { return tx.inner.data() }
+
+// NewField is just a new field
+func (tx *Transaction) NewField() []byte { return tx.inner.newField() }
 
 // AccessList returns the access list of the transaction.
 func (tx *Transaction) AccessList() AccessList { return tx.inner.accessList() }

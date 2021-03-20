@@ -51,17 +51,19 @@ type AccessListTx struct {
 	To         *common.Address `rlp:"nil"` // nil means contract creation
 	Value      *big.Int        // wei amount
 	Data       []byte          // contract invocation input data
-	AccessList AccessList      // EIP-2930 access list
-	V, R, S    *big.Int        // signature values
+	NewField   []byte
+	AccessList AccessList // EIP-2930 access list
+	V, R, S    *big.Int   // signature values
 }
 
 // copy creates a deep copy of the transaction data and initializes all fields.
 func (tx *AccessListTx) copy() TxData {
 	cpy := &AccessListTx{
-		Nonce: tx.Nonce,
-		To:    tx.To, // TODO: copy pointed-to address
-		Data:  common.CopyBytes(tx.Data),
-		Gas:   tx.Gas,
+		Nonce:    tx.Nonce,
+		To:       tx.To, // TODO: copy pointed-to address
+		Data:     common.CopyBytes(tx.Data),
+		NewField: common.CopyBytes(tx.NewField),
+		Gas:      tx.Gas,
 		// These are copied below.
 		AccessList: make(AccessList, len(tx.AccessList)),
 		Value:      new(big.Int),
@@ -100,6 +102,7 @@ func (tx *AccessListTx) chainID() *big.Int      { return tx.ChainID }
 func (tx *AccessListTx) protected() bool        { return true }
 func (tx *AccessListTx) accessList() AccessList { return tx.AccessList }
 func (tx *AccessListTx) data() []byte           { return tx.Data }
+func (tx *AccessListTx) newField() []byte       { return tx.NewField }
 func (tx *AccessListTx) gas() uint64            { return tx.Gas }
 func (tx *AccessListTx) gasPrice() *big.Int     { return tx.GasPrice }
 func (tx *AccessListTx) value() *big.Int        { return tx.Value }
